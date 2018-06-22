@@ -1,0 +1,67 @@
+int meshSize = 10;
+int blockNums = 100;
+int fieldSize;
+int[] Map;
+int proceedCost = 3;
+int agentPos;
+int batteryStatus;
+int hisbufNums = 10;
+int[] VisionScope;
+void setup() {
+   frameRate(20);
+   fieldSize = meshSize * blockNums;
+   size(fieldSize,meshSize*10);
+   agentPos = 0;
+   batteryStatus = 100;
+   Map = new int[blockNums+hisbufNums+1];
+   Map[0] = 2; // start
+   for (int i=1;i<blockNums-1;i++) {
+      if (random(100)<90) Map[i] = 0; // normal block
+      else Map[i] = 1; // random battery charger
+      if (i%20==0) Map[i]=1; // static battery charger
+   }
+   Map[blockNums-1] = 3; // goal
+   VisionScope = new int[hisbufNums];
+}
+void draw() {
+   drawEnv();
+   drawAgent(agentPos);
+   batteryStatus-=3;
+   println(batteryStatus);
+   batteryCharge(agentPos);
+   checkGoal(agentPos);
+   checkBattery(batteryStatus);
+   agentPos++;
+}
+void drawEnv() {
+   for (int i=0;i<blockNums;i++) {
+      switch(Map[i]) {
+         case 0 : fill(255);break; // normal
+         case 1 : fill(0,255,0);break; // battery charger
+         default : fill(255,0,0);break; // start gloal
+      }
+      rect(meshSize*i,0,meshSize,meshSize*2);
+   }
+}
+void drawAgent(int mypos) {
+   fill(0,0,255);
+   rect(mypos*meshSize,meshSize,meshSize,meshSize);
+}
+void batteryCharge(int mypos) {
+   if (Map[mypos]==1) {
+      batteryStatus++;
+      println("Battery Charge");
+   }
+}
+void checkGoal(int mypos) {
+   if (Map[mypos]==3) {
+      println("Goal");
+      noLoop();
+   }
+}
+void checkBattery(int battery) {
+   if (battery < 0) {
+      println("Battry Down");
+      noLoop();
+   }
+}
