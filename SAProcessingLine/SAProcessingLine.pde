@@ -27,13 +27,51 @@ void setup() {
 void draw() {
    sensing(agentPos);
    checkBattery(batteryStatus);
-   batteryCharge(agentPos,batteryStatus);
    checkGoal(agentPos);
    drawEnv();
    drawAgent(agentPos);
    println(batteryStatus);
-   agentPos++;
-   batteryStatus-=3;
+   //ruleBaseBehaiv();
+   int actionAlive=2;
+   int impAlive=0;
+   if (batteryStatus<=20) {
+      if (VisionScope[scopeRange]==1) {
+         actionAlive=0;
+      } else {
+         for (int i=1;i<scopeRange;i++) {
+            if (VisionScope[scopeRange+i]==1) {
+               actionAlive=1;
+               break;
+            }
+            if (VisionScope[scopeRange-i]==1) {
+               actionAlive=-1;
+               break;
+            }
+         }
+      }
+   }
+   int actionProgress=2;
+   if (batteryStatus<=60 && VisionScope[scopeRange]==1){
+      for (int i=1;i<scopeRange;i++) {
+         if (VisionScope[scopeRange+i]==1) {
+            actionProgress=1;
+            break;
+         }
+         actionProgress=0;
+      }
+   } else {
+       actionProgress=1;
+   }
+   if (actionAlive==2) agentMove(actionProgress);
+   else agentMove(actionAlive);
+}
+void agentMove(int src) {
+   if (src!=0) {
+      agentPos+=src;
+      batteryStatus-=proceedCost;
+   } else {
+      batteryCharge();
+   }
 }
 void drawEnv() {
    for (int i=0;i<blockNums;i++) {
@@ -60,11 +98,10 @@ void drawAgent(int mypos) {
    fill(0,0,255);
    rect(mypos*meshSize,meshSize,meshSize,meshSize);
 }
-void batteryCharge(int mypos,int bat) {
-   if (Map[mypos]==1&&bat<100) {
-      batteryStatus++;
-      println("Battery Charge");
-   }
+void batteryCharge() {
+   batteryStatus+=10;
+   println("Battery Charge");
+   if (batteryStatus>100)batteryStatus=100;
 }
 void checkGoal(int mypos) {
    if (Map[mypos]==3) {
@@ -84,21 +121,27 @@ void sensing(int mypos) {
       if (mypos-scopeRange+i>=0) VisionScope[i] = Map[mypos-scopeRange+i];
    }
 }
-void aliveBehav(int[] vs,int bat) {
-   if (Map[vs[scopeRange]]==1) { // charge now
-      if (bat==100) { // full
-      } else { // not full
-      }
-   } else { // not charge
-      if (bat<10) { // want charger
-         int[] temp;
-         for (int i=0;i<scopeRange*2+1;i++) {
-            if (vs[i]==1) temp.append(i-scopeRange);
+void ruleBaseBehaiv(){
+     if (batteryStatus<30) {
+      if (VisionScope[scopeRange]==1) {
+         //null
+      } else {
+         for (int i=1;i<scopeRange;i++) {
+            if (VisionScope[scopeRange+i]==1) {
+               agentPos++;
+               batteryStatus-=proceedCost;
+               break;
+            }
+            if (VisionScope[scopeRange-i]==1) {
+               agentPos--;
+               batteryStatus-=proceedCost;
+               break;
+            }
+            //null
          }
-         if (temp.length>0) {
-            if ()
-         }
-      } else { // not want charger
       }
+   } else {
+      agentPos++;
+      batteryStatus-=proceedCost;
    }
 }
