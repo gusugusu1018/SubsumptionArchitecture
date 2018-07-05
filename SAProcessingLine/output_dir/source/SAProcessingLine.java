@@ -1,3 +1,19 @@
+import processing.core.*; 
+import processing.data.*; 
+import processing.event.*; 
+import processing.opengl.*; 
+
+import java.util.HashMap; 
+import java.util.ArrayList; 
+import java.io.File; 
+import java.io.BufferedReader; 
+import java.io.PrintWriter; 
+import java.io.InputStream; 
+import java.io.OutputStream; 
+import java.io.IOException; 
+
+public class SAProcessingLine extends PApplet {
+
 int meshSize = 10;
 int blockNums = 100;
 int fieldSize;
@@ -10,7 +26,7 @@ int[] VisionScope;
 int agentStatus = 0;//0 defined as running //1 defined as charging
 int finCharge = 0;//0 defined as not fin //1 defined as fin
 int step=1;
-void setup() {
+public void setup() {
    frameRate(20);
    fieldSize = meshSize * blockNums;
    size(fieldSize,meshSize*10);
@@ -27,7 +43,7 @@ void setup() {
    VisionScope = new int[scopeRange*2+1];
    for (int i=0;i<scopeRange*2+1;i++) VisionScope[i] = 0;
 }
-void draw() {
+public void draw() {
    sensing(agentPos);
    checkBattery(batteryStatus);
    checkGoal(agentPos);
@@ -102,7 +118,7 @@ void draw() {
    else agentMove(actionAlive);
    step++;
 }
-void agentMove(int src) {
+public void agentMove(int src) {
    if (src!=0) {
       agentPos+=src;
       batteryStatus-=proceedCost;
@@ -111,7 +127,7 @@ void agentMove(int src) {
       batteryCharge();
    }
 }
-void drawEnv() {
+public void drawEnv() {
    for (int i=0;i<blockNums;i++) {
       switch(Map[i]) {
          case 0 : fill(255);break; // normal
@@ -121,7 +137,7 @@ void drawEnv() {
       rect(meshSize*i,0,meshSize,meshSize);
    }
 }
-void drawAgent(int mypos) {
+public void drawAgent(int mypos) {
    fill(0);
    rect(0,meshSize,fieldSize,meshSize);
    for (int i=0;i<scopeRange*2+1;i++) {
@@ -136,7 +152,7 @@ void drawAgent(int mypos) {
    fill(0,0,255);
    rect(mypos*meshSize,meshSize,meshSize,meshSize);
 }
-void batteryCharge() {
+public void batteryCharge() {
    batteryStatus+=10;
    println("Battery Charge");
    if (batteryStatus>100) {
@@ -144,25 +160,25 @@ void batteryCharge() {
       finCharge=1;
    }
 }
-void checkGoal(int mypos) {
+public void checkGoal(int mypos) {
    if (Map[mypos]==3) {
       println("Goal");
       noLoop();
    }
 }
-void checkBattery(int battery) {
+public void checkBattery(int battery) {
    if (battery < 0) {
       println("Battry Down");
       noLoop();
    }
 }
-void sensing(int mypos) {
+public void sensing(int mypos) {
    for (int i=0;i<scopeRange*2+1;i++) {
       // i=scopeRange == mypos
       if (mypos-scopeRange+i>=0) VisionScope[i] = Map[mypos-scopeRange+i];
    }
 }
-void ruleBaseBehaiv(){
+public void ruleBaseBehaiv(){
      if (batteryStatus<30) {
       if (VisionScope[scopeRange]==1) {
          //null
@@ -185,4 +201,13 @@ void ruleBaseBehaiv(){
       agentPos++;
       batteryStatus-=proceedCost;
    }
+}
+  static public void main(String[] passedArgs) {
+    String[] appletArgs = new String[] { "SAProcessingLine" };
+    if (passedArgs != null) {
+      PApplet.main(concat(appletArgs, passedArgs));
+    } else {
+      PApplet.main(appletArgs);
+    }
+  }
 }
